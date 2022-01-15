@@ -1,0 +1,8 @@
+project/*
+!project/build.properties
+!project/metals.sbt
+
+target/
+.bloop/
+.metals/
+.vscode/
