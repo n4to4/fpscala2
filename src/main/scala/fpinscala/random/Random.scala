@@ -33,6 +33,25 @@ object State:
   extension [S, A](underlying: State[S, A])
     def run(s: S): (A, S) = underlying(s)
 
+    def map[B](f: A => B): State[S, B] = s =>
+      val (a, s2) = underlying(s)
+      (f(a), s2)
+
+    def map2[B, C](sb: State[S, B])(f: (A, B) => C): State[S, C] =
+      for {
+        a <- underlying
+        b <- sb
+      } yield f(a, b)
+
+    def flatMap[B](f: A => State[S, B]): State[S, B] = s =>
+      val (a, s2) = underlying(s)
+      f(a)(s2)
+
   def apply[S, A](f: S => (A, S)): State[S, A] = f
+
+  def unit[S, A](a: A): State[S, A] = s => (a, s)
+
+  def sequence[S, A](states: List[State[S, A]]): State[S, List[A]] =
+    states.foldRight(unit[S, List[A]](Nil))((s, acc) => s.map2(acc)(_ :: _))
 
 type Rand2[A] = State[RNG, A]
