@@ -22,3 +22,17 @@ case class SimpleRNG(seed: Long) extends RNG:
     }
 
 type Rand[+A] = RNG => (A, RNG)
+
+//type State[S, +A] = S => (A, S)
+
+//case class State[S, +A](run: S => (A, S))
+
+opaque type State[S, +A] = S => (A, S)
+
+object State:
+  extension [S, A](underlying: State[S, A])
+    def run(s: S): (A, S) = underlying(s)
+
+  def apply[S, A](f: S => (A, S)): State[S, A] = f
+
+type Rand2[A] = State[RNG, A]
